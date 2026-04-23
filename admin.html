@@ -478,6 +478,281 @@ tbody td {
 
 .toast.show { transform: translateX(0); }
 .toast.success { border-left-color: var(--green-light); }
+
+/* ═══════════════════════════════════════════════
+   MOBILE OPTIMIZATION
+   ═══════════════════════════════════════════════ */
+
+/* Hamburger menu button (mobile only) */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+
+.mobile-menu-btn svg {
+  width: 20px; height: 20px;
+  stroke: currentColor;
+}
+
+/* Mobile overlay when sidebar opens */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 150;
+  backdrop-filter: blur(4px);
+}
+
+@media (max-width: 1024px) {
+  /* Hamburger */
+  .mobile-menu-btn { display: flex !important; }
+
+  /* Sidebar becomes drawer — completely out of flow */
+  .admin-layout {
+    grid-template-columns: 1fr !important;
+    display: block !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 200 !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-overlay.show { display: block; }
+
+  .admin-main {
+    padding: 5rem 1rem 2rem;
+  }
+
+  /* Page header */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  .page-title { font-size: 1.5rem; }
+  .page-subtitle { font-size: 0.75rem; }
+
+  /* Stats — 2 columns on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-value { font-size: 1.8rem; }
+  .stat-label { font-size: 0.6rem; }
+
+  /* Filters — scroll horizontally */
+  .filters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-btn {
+    flex-shrink: 0;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+  }
+
+  /* HIDE TABLE on mobile — show CARDS instead */
+  .table-wrapper {
+    background: transparent;
+    border: none;
+  }
+
+  .table-wrapper table { display: none; }
+
+  /* Card layout */
+  .mobile-cards { display: flex !important; flex-direction: column; gap: 0.8rem; }
+
+  /* Add form — 1 column */
+  .add-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  /* Disponibilitate — 1 column */
+  .page-section#section-calendar > div:first-of-type {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal fullscreen-ish */
+  .modal {
+    padding: 1.5rem;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+
+  .modal-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  /* Toast positioning */
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+  }
+
+  /* Login box */
+  .login-box {
+    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+
+  /* Add button full width */
+  .add-btn {
+    width: 100%;
+  }
+}
+
+/* CARD VIEW (replaces table on mobile) */
+.mobile-cards { display: none; }
+
+.rez-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  padding: 1rem;
+  transition: border-left-color 0.2s;
+}
+
+.rez-card.pending { border-left-color: var(--yellow); }
+.rez-card.confirmed { border-left-color: var(--green-light); }
+.rez-card.cancelled { border-left-color: var(--red); opacity: 0.6; }
+
+.rez-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.rez-card-date {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+
+.rez-card-time {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--red);
+}
+
+.rez-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rez-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.rez-card-row .label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey);
+  flex-shrink: 0;
+}
+
+.rez-card-row .value {
+  color: var(--white);
+  text-align: right;
+  word-break: break-word;
+}
+
+.rez-card-row .value a {
+  color: var(--white);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--grey);
+}
+
+.rez-card-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.rez-card-actions .btn-action {
+  padding: 0.6rem 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.rez-card-actions .btn-action.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Badge on mobile card */
+.rez-card .badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+}
+
+/* Small screens — further tweaks */
+@media (max-width: 400px) {
+  .admin-main { padding: 5rem 0.7rem 2rem; }
+  .rez-card-actions { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { gap: 0.4rem; }
+  .stat-card { padding: 0.8rem; }
+  .stat-value { font-size: 1.5rem; }
+}
+
 </style>
 </head>
 <body>
@@ -498,6 +773,16 @@ tbody td {
 </div>
 
 <!-- ADMIN LAYOUT -->
+<!-- Mobile menu -->
+<button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleSidebar()" style="display:none">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <div class="admin-layout" id="admin-app" style="display:none">
 
   <!-- SIDEBAR -->
@@ -557,6 +842,10 @@ tbody td {
         <button class="filter-btn" onclick="filterRezervari('cancelled', this)">Anulate</button>
       </div>
 
+      <!-- Mobile cards (hidden on desktop) -->
+      <div class="mobile-cards" id="mobile-cards"></div>
+
+      <!-- Desktop table (hidden on mobile) -->
       <div class="table-wrapper">
         <table>
           <thead>
@@ -806,6 +1095,17 @@ const MONTHS = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov
 let allRezervari = [];
 let currentFilter = 'all';
 
+// ═══ MOBILE NAVIGATION ═══
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -815,6 +1115,7 @@ async function doLogin() {
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-app').style.display = 'grid';
+    document.getElementById('mobile-menu-btn').style.display = '';
     loadRezervari();
     loadBlockedDays();
     loadBlockedSlots();
@@ -826,6 +1127,8 @@ async function doLogin() {
 function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('admin-app').style.display = 'none';
+  document.getElementById('mobile-menu-btn').style.display = 'none';
+  closeSidebar();
   document.getElementById('login-email').value = '';
   document.getElementById('login-pass').value = '';
 }
@@ -844,6 +1147,7 @@ function showSection(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`section-${name}`).classList.add('active');
   event.currentTarget.classList.add('active');
+  closeSidebar();
 }
 
 // FORMAT DATE
@@ -890,13 +1194,16 @@ function filterRezervari(filter, btn) {
 
 function renderTable(filter) {
   const tbody = document.getElementById('rezervari-tbody');
+  const cardsContainer = document.getElementById('mobile-cards');
   const items = filter === 'all' ? allRezervari : allRezervari.filter(r => r.status === filter);
 
   if (items.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Nu există rezervări</td></tr>';
+    if (cardsContainer) cardsContainer.innerHTML = '<div class="empty-state">Nu există rezervări</div>';
     return;
   }
 
+  // Desktop table
   tbody.innerHTML = items.map(r => `
     <tr>
       <td><strong>${formatDate(r.data)}</strong></td>
@@ -917,6 +1224,47 @@ function renderTable(filter) {
       </td>
     </tr>
   `).join('');
+
+  // Mobile cards
+  if (cardsContainer) {
+    cardsContainer.innerHTML = items.map(r => `
+      <div class="rez-card ${r.status}">
+        <div class="rez-card-header">
+          <div>
+            <div class="rez-card-date">${formatDate(r.data)}</div>
+            <div class="rez-card-time">${r.ora ? r.ora.slice(0,5) : '—'} • ${r.persoane} pers.</div>
+          </div>
+          <span class="badge ${r.status}">${r.status === 'pending' ? 'Așteptare' : r.status === 'confirmed' ? 'Confirmată' : 'Anulată'}</span>
+        </div>
+        <div class="rez-card-body">
+          <div class="rez-card-row">
+            <span class="label">Nume</span>
+            <span class="value">${r.nume}</span>
+          </div>
+          <div class="rez-card-row">
+            <span class="label">Telefon</span>
+            <span class="value"><a href="tel:${r.telefon}">${r.telefon}</a></span>
+          </div>
+          <div class="rez-card-row">
+            <span class="label">Email</span>
+            <span class="value"><a href="mailto:${r.email}">${r.email}</a></span>
+          </div>
+          <div class="rez-card-row">
+            <span class="label">Pachet</span>
+            <span class="value">${r.pachet}</span>
+          </div>
+          ${r.pret_estimat ? `<div class="rez-card-row"><span class="label">Preț</span><span class="value">${r.pret_estimat}</span></div>` : ''}
+          ${r.mentiuni ? `<div class="rez-card-row"><span class="label">Mențiuni</span><span class="value">${r.mentiuni}</span></div>` : ''}
+        </div>
+        <div class="rez-card-actions">
+          ${r.status !== 'confirmed' ? `<button class="btn-action btn-confirm" onclick="changeStatus('${r.id}', 'confirmed')">✓ Confirmă</button>` : ''}
+          ${r.status !== 'cancelled' ? `<button class="btn-action btn-cancel" onclick="changeStatus('${r.id}', 'cancelled')">✕ Anulează</button>` : ''}
+          <button class="btn-action btn-edit" onclick="openEdit('${r.id}')">✎ Editează</button>
+          <button class="btn-action btn-delete" onclick="deleteRez('${r.id}')">🗑 Șterge</button>
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 async function changeStatus(id, status) {
