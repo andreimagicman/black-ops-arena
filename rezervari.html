@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rezervări | Black Ops Arena</title>
+<meta name="description" content="Rezervă o sesiune de airsoft la Black Ops Arena, Baia de Fier, Gorj.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --black: #0a0707;
+  --dark: #120e0e;
+  --card: #181313;
+  --border: #241b1b;
+  --red: #c8342c;
+  --red-bright: #e04038;
+  --white: #ede8e3;
+  --grey: #6b6b6b;
+  --grey-light: #9a9a9a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  background: rgba(10,7,7,0.96);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.12em;
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.nav-logo span { color: var(--red); }
+
+.nav-back {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey-light);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.nav-back:hover { color: var(--white); }
+
+/* HERO */
+.booking-hero {
+  background: linear-gradient(180deg, #120808 0%, var(--black) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200,52,44,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,52,44,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.booking-hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: 0.08em;
+  color: var(--white);
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.booking-hero h1 span { color: var(--red); }
+
+.booking-hero p {
+  font-size: 1rem;
+  color: var(--grey-light);
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* MAIN */
+.booking-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* STEPS */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 3rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.step-num {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--grey);
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  transition: all 0.3s;
+}
+
+.step.active .step-num {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.step.done .step-num {
+  background: rgba(200,52,44,0.2);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.step-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey);
+  transition: color 0.3s;
+}
+
+.step.active .step-label { color: var(--white); }
+.step.done .step-label { color: var(--red); }
+
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  min-width: 30px;
+  margin: 0 0.5rem;
+}
+
+/* PANELS */
+.panel {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.panel.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* CALENDAR */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.cal-box, .slots-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 1.8rem;
+}
+
+.box-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.box-title::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 1.2rem;
+  background: var(--red);
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.cal-month {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.cal-nav {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--grey-light);
+  width: 30px; height: 30px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+
+.cal-nav:hover { border-color: var(--red); color: var(--white); }
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.cal-weekday {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey);
+  text-align: center;
+  padding: 0.4rem 0;
+}
+
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+  border-radius: 2px;
+}
+
+.cal-day.empty { cursor: default; }
+.cal-day.past { color: #333; cursor: not-allowed; }
+
+.cal-day.available {
+  color: var(--white);
+  background: rgba(200,52,44,0.06);
+  border-color: var(--border);
+}
+
+.cal-day.available:hover {
+  background: rgba(200,52,44,0.2);
+  border-color: var(--red);
+}
+
+.cal-day.full {
+  color: var(--grey);
+  background: rgba(255,255,255,0.02);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.cal-day.blocked {
+  color: #444;
+  background: rgba(255,0,0,0.04);
+  cursor: not-allowed;
+  position: relative;
+}
+
+.cal-day.blocked::after {
+  content: '✕';
+  position: absolute;
+  font-size: 0.5rem;
+  bottom: 2px;
+  right: 3px;
+  color: var(--red);
+  opacity: 0.5;
+}
+
+.cal-day.selected {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.cal-day.today {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.cal-day.today.selected { color: var(--white); }
+
+.cal-day.available::after {
+  content: '';
+  position: absolute;
+  bottom: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  background: var(--red);
+  border-radius: 50%;
+}
+
+.cal-day.selected::after { background: white; }
+
+.cal-legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.av { background: var(--red); }
+.legend-dot.full { background: var(--border); }
+.legend-dot.blocked { border: 1px solid var(--red); }
+
+/* SLOTS */
+.no-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 1rem;
+  color: var(--grey);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.slots-date-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 1rem;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.slot-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--grey-light);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  padding: 0.8rem;
+  cursor: pointer;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  transition: all 0.2s;
+}
+
+.slot-btn:hover {
+  border-color: var(--red);
+  color: var(--white);
+  background: rgba(200,52,44,0.1);
+}
+
+.slot-btn.selected {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.slot-btn.occupied {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* FORM */
+.form-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  margin-top: 1.5rem;
+}
+
+.booking-summary-bar {
+  background: rgba(200,52,44,0.08);
+  border: 1px solid rgba(200,52,44,0.2);
+  padding: 1rem 1.5rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.sum-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sum-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.sum-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--white);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.form-input, .form-select {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.8rem 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+
+.form-input:focus, .form-select:focus { border-color: var(--red); }
+.form-select option { background: var(--dark); }
+
+.price-preview {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  padding: 0.8rem 1rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.btn-primary {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--red);
+  border: none;
+  padding: 1.1rem 2rem;
+  cursor: pointer;
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  transition: background 0.2s, transform 0.2s;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.btn-primary:hover { background: var(--red-bright); transform: translateY(-2px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--grey-light);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--red); color: var(--white); }
+
+.btn-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* SUCCESS */
+.success-page {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.success-icon {
+  width: 80px; height: 80px;
+  border: 2px solid var(--red);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 2rem;
+}
+
+.success-icon svg {
+  width: 40px; height: 40px;
+  stroke: var(--red);
+}
+
+.success-page h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+
+.success-page p {
+  font-size: 1rem;
+  color: var(--grey-light);
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.highlight { color: var(--red); font-weight: 600; }
+
+/* LOADING */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,7,7,0.9);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  display: none;
+}
+
+.spinner {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .calendar-layout { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .slots-grid { grid-template-columns: repeat(2, 1fr); }
+  .booking-summary-bar { gap: 1rem; }
+  .btn-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">BLACK <span>OPS</span> ARENA</a>
+  <a href="/" class="nav-back">← Înapoi la site</a>
+</nav>
+
+<!-- HERO -->
+<div class="booking-hero">
+  <h1>REZERVĂ <span>MISIUNEA</span></h1>
+  <p>Alege data, ora și completează detaliile. Confirmarea vine în maximum 2 ore.</p>
+</div>
+
+<!-- MAIN -->
+<div class="booking-main">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-label">Data & Ora</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-label">Detalii</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-label">Confirmare</div>
+    </div>
+  </div>
+
+  <!-- PANEL 1 — Calendar -->
+  <div class="panel active" id="panel1">
+    <div class="calendar-layout">
+      <div class="cal-box">
+        <div class="box-title">Alege Data</div>
+        <div class="cal-header">
+          <button class="cal-nav" id="cal-prev">‹</button>
+          <div class="cal-month" id="cal-month"></div>
+          <button class="cal-nav" id="cal-next">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <div class="cal-weekday">Lu</div>
+          <div class="cal-weekday">Ma</div>
+          <div class="cal-weekday">Mi</div>
+          <div class="cal-weekday">Jo</div>
+          <div class="cal-weekday">Vi</div>
+          <div class="cal-weekday">Sâ</div>
+          <div class="cal-weekday">Du</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-dot av"></div><span>Disponibil</span></div>
+          <div class="legend-item"><div class="legend-dot full"></div><span>Complet</span></div>
+          <div class="legend-item"><div class="legend-dot blocked"></div><span>Blocat</span></div>
+        </div>
+      </div>
+
+      <div class="slots-box">
+        <div class="box-title">Alege Ora</div>
+        <div class="no-date" id="no-date">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Selectează o dată</span>
+        </div>
+        <div id="slots-content" style="display:none">
+          <div class="slots-date-label" id="slots-date-label"></div>
+          <div class="slots-grid" id="slots-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2 — Form -->
+  <div class="panel" id="panel2">
+    <div class="form-section">
+      <div class="booking-summary-bar">
+        <div class="sum-item">
+          <div class="sum-label">Data</div>
+          <div class="sum-value" id="sum-data">—</div>
+        </div>
+        <div class="sum-item">
+          <div class="sum-label">Ora</div>
+          <div class="sum-value" id="sum-ora">—</div>
+        </div>
+        <div class="sum-item">
+          <div class="sum-label">Pachet</div>
+          <div class="sum-value" id="sum-pachet">—</div>
+        </div>
+        <div class="sum-item">
+          <div class="sum-label">Total estimat</div>
+          <div class="sum-value" id="sum-total">—</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nume complet *</label>
+          <input type="text" class="form-input" id="f-nume" placeholder="Ion Popescu">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefon *</label>
+          <input type="tel" class="form-input" id="f-telefon" placeholder="07XX XXX XXX">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-input" id="f-email" placeholder="email@exemplu.ro">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Număr persoane * (minim 6)</label>
+          <select class="form-select" id="f-persoane">
+            <option value="">Selectează</option>
+            <option value="6">6 persoane</option>
+            <option value="7">7 persoane</option>
+            <option value="8">8 persoane</option>
+            <option value="9">9 persoane</option>
+            <option value="10">10 persoane</option>
+            <option value="12">12 persoane</option>
+            <option value="15">15 persoane</option>
+            <option value="20">20+ persoane</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pachet *</label>
+          <select class="form-select" id="f-pachet">
+            <option value="">Selectează</option>
+            <option value="Sesiune Standard" data-min="60" data-max="70">Sesiune Standard — 60-70 lei/pers</option>
+            <option value="Pachet Aventură" data-min="100" data-max="120">Pachet Aventură — 100-120 lei/pers</option>
+            <option value="Pachet Corporate" data-min="150" data-max="180">Pachet Corporate — 150-180 lei/pers</option>
+            <option value="Pachet Turist" data-min="75" data-max="85">Pachet Turist — 75-85 lei/pers</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Preț estimat</label>
+          <div class="price-preview" id="price-preview">Selectează pachetul și numărul de persoane</div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Mențiuni (opțional)</label>
+          <input type="text" class="form-input" id="f-mentiuni" placeholder="Zi de naștere, echipament special, etc.">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goBack()">← Înapoi</button>
+        <button class="btn-primary" onclick="submitBooking()">CONFIRMĂ REZERVAREA →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3 — Success -->
+  <div class="panel" id="panel3">
+    <div class="success-page">
+      <div class="success-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>REZERVARE TRIMISĂ!</h2>
+      <p>
+        Mulțumim, <span class="highlight" id="s-nume"></span>!<br>
+        Rezervarea pentru <span class="highlight" id="s-data"></span> la ora <span class="highlight" id="s-ora"></span> a fost înregistrată.<br><br>
+        Vei fi contactat în maximum <strong style="color:var(--white)">2 ore</strong> pentru confirmare la <span class="highlight" id="s-telefon"></span>.
+      </p>
+      <a href="/" style="display:inline-block;margin-top:1rem;" class="btn-secondary">← Înapoi la site</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://arpdfekkiylimbaogpnh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_o2lBZfjY60L4BdLEXmNeZA_h3GcKX44';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const SLOTS = ['09:00', '11:00', '13:00', '15:00', '17:00', '19:00'];
+const MONTHS = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+
+let viewYear = new Date().getFullYear();
+let viewMonth = new Date().getMonth();
+let selectedDate = null;
+let selectedSlot = null;
+let blockedDays = [];
+let blockedSlots = [];
+let existingBookings = [];
+
+// Load blocked days + slots from Supabase
+async function loadAvailability() {
+  const { data: days } = await db.from('zile_blocate').select('data');
+  const { data: slots } = await db.from('sloturi_blocate').select('data, ora');
+  const { data: bookings } = await db.from('rezervari').select('data, ora').eq('status', 'confirmed');
+
+  blockedDays = (days || []).map(d => d.data);
+  blockedSlots = (slots || []).map(s => `${s.data}_${s.ora.slice(0,5)}`);
+  existingBookings = (bookings || []).map(b => `${b.data}_${b.ora.slice(0,5)}`);
+
+  renderCalendar();
+}
+
+function formatDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatDateRO(str) {
+  const [y,m,d] = str.split('-');
+  return `${parseInt(d)} ${MONTHS[parseInt(m)-1]} ${y}`;
+}
+
+function renderCalendar() {
+  document.getElementById('cal-month').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+  const grid = document.getElementById('cal-days');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay = new Date(viewYear, viewMonth+1, 0);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let dow = firstDay.getDay();
+  dow = dow === 0 ? 6 : dow - 1;
+
+  for (let i = 0; i < dow; i++) {
+    const e = document.createElement('div');
+    e.className = 'cal-day empty';
+    grid.appendChild(e);
+  }
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(viewYear, viewMonth, d);
+    const dateStr = formatDateStr(date);
+    const el = document.createElement('div');
+    el.textContent = d;
+    el.className = 'cal-day';
+
+    const isPast = date < today;
+    const isBlocked = blockedDays.includes(dateStr);
+    const occupiedSlots = existingBookings.filter(b => b.startsWith(dateStr)).length +
+                          blockedSlots.filter(b => b.startsWith(dateStr)).length;
+    const isFull = occupiedSlots >= SLOTS.length;
+
+    if (date.getTime() === today.getTime()) el.classList.add('today');
+    if (selectedDate === dateStr) el.classList.add('selected');
+
+    if (isPast) {
+      el.classList.add('past');
+    } else if (isBlocked) {
+      el.classList.add('blocked');
+    } else if (isFull) {
+      el.classList.add('full');
+    } else {
+      el.classList.add('available');
+      el.addEventListener('click', () => selectDate(dateStr));
+    }
+
+    grid.appendChild(el);
+  }
+}
+
+function selectDate(dateStr) {
+  selectedDate = dateStr;
+  selectedSlot = null;
+  renderCalendar();
+  renderSlots();
+}
+
+function renderSlots() {
+  document.getElementById('no-date').style.display = 'none';
+  document.getElementById('slots-content').style.display = 'block';
+  document.getElementById('slots-date-label').textContent = formatDateRO(selectedDate);
+
+  const grid = document.getElementById('slots-grid');
+  grid.innerHTML = '';
+
+  SLOTS.forEach(slot => {
+    const key = `${selectedDate}_${slot}`;
+    const isOccupied = existingBookings.includes(key) || blockedSlots.includes(key);
+    const btn = document.createElement('button');
+    btn.className = 'slot-btn' + (isOccupied ? ' occupied' : '') + (selectedSlot === slot ? ' selected' : '');
+    btn.textContent = slot;
+    btn.disabled = isOccupied;
+    if (!isOccupied) {
+      btn.addEventListener('click', () => {
+        selectedSlot = slot;
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        goToStep2();
+      });
+    }
+    grid.appendChild(btn);
+  });
+}
+
+function goToStep2() {
+  if (!selectedDate || !selectedSlot) return;
+  document.getElementById('sum-data').textContent = formatDateRO(selectedDate);
+  document.getElementById('sum-ora').textContent = selectedSlot;
+  setPanel(2);
+}
+
+function goBack() { setPanel(1); }
+
+function setPanel(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel${n}`).classList.add('active');
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i+1 < n) s.classList.add('done');
+    if (i+1 === n) s.classList.add('active');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Price calculator
+document.addEventListener('DOMContentLoaded', () => {
+  const pkg = document.getElementById('f-pachet');
+  const pers = document.getElementById('f-persoane');
+  const preview = document.getElementById('price-preview');
+
+  function updatePrice() {
+    const opt = pkg.selectedIndex > 0 ? pkg.options[pkg.selectedIndex] : null;
+    const p = parseInt(pers.value) || 0;
+    if (opt && p) {
+      const min = parseInt(opt.dataset.min) * p;
+      const max = parseInt(opt.dataset.max) * p;
+      preview.textContent = `${min} - ${max} lei`;
+      document.getElementById('sum-pachet').textContent = opt.value;
+      document.getElementById('sum-total').textContent = `${min}-${max} lei`;
+    } else {
+      preview.textContent = 'Selectează pachetul și numărul de persoane';
+    }
+  }
+
+  pkg.addEventListener('change', updatePrice);
+  pers.addEventListener('change', updatePrice);
+
+  // Calendar nav
+  document.getElementById('cal-prev').addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById('cal-next').addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderCalendar();
+  });
+
+  loadAvailability();
+});
+
+async function submitBooking() {
+  const nume = document.getElementById('f-nume').value.trim();
+  const telefon = document.getElementById('f-telefon').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const persoane = document.getElementById('f-persoane').value;
+  const pachetEl = document.getElementById('f-pachet');
+  const pachet = pachetEl.value;
+  const mentiuni = document.getElementById('f-mentiuni').value.trim();
+
+  if (!nume || !telefon || !email || !persoane || !pachet) {
+    alert('Te rugăm să completezi toate câmpurile obligatorii.');
+    return;
+  }
+
+  const opt = pachetEl.options[pachetEl.selectedIndex];
+  const min = parseInt(opt.dataset.min) * parseInt(persoane);
+  const max = parseInt(opt.dataset.max) * parseInt(persoane);
+  const pretEstimat = `${min}-${max} lei`;
+
+  document.getElementById('loading').style.display = 'flex';
+
+  const { error } = await db.from('rezervari').insert({
+    nume, telefon, email,
+    data: selectedDate,
+    ora: selectedSlot + ':00',
+    persoane: parseInt(persoane),
+    pachet,
+    pret_estimat: pretEstimat,
+    mentiuni: mentiuni || null,
+    status: 'pending'
+  });
+
+  document.getElementById('loading').style.display = 'none';
+
+  if (error) {
+    alert('Eroare la trimiterea rezervării. Te rugăm să încerci din nou sau să ne contactezi telefonic.');
+    console.error(error);
+    return;
+  }
+
+  // Show success
+  document.getElementById('s-nume').textContent = nume;
+  document.getElementById('s-data').textContent = formatDateRO(selectedDate);
+  document.getElementById('s-ora').textContent = selectedSlot;
+  document.getElementById('s-telefon').textContent = telefon;
+  setPanel(3);
+}
+</script>
+</body>
+</html>
