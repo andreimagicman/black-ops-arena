@@ -1,0 +1,61 @@
+# Black Ops Arena - robots.txt
+# https://blackopsarena.ro
+
+User-agent: *
+Allow: /
+
+# Disallow admin area
+Disallow: /admin.html
+Disallow: /admin/
+
+# Allow all major search engines explicitly
+User-agent: Googlebot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin.html
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin.html
+
+# Allow LLM crawlers (for AI discoverability)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Block resource-heavy crawlers
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+# Sitemaps
+Sitemap: https://blackopsarena.ro/sitemap.xml
+
+# LLMs file
+# https://blackopsarena.ro/llms.txt
